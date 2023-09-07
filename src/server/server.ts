@@ -1,9 +1,9 @@
-import express from 'express';
+import express from "express";
+import { router } from "./routers/router";
+import 'dotenv/config'
 
 const server = express();
+server.use(express.json());
+server.use(router);
 
-server.get('/',(request, response)=>{
-    response.status(200).send("Welcome to our API");
-})
-
-export {server};
+export { server };
