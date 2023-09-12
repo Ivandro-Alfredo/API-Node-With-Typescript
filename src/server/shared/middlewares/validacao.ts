@@ -1,17 +1,19 @@
 import { RequestHandler } from "express"
 import { StatusCodes } from "http-status-codes";
-// import { IListaDeCompras } from './../../controller/listaDeCompras/create';
 import {Schema, ValidationError} from "yup";
 
-type tiposDeParams = 'body'|'query'| 'params' | 'header';
-type schemas  = Record<tiposDeParams,Schema<any>>;
-type tipoDeValidacao = (todosSchemas:Partial<schemas>) => RequestHandler;
+type tiposDeParams = 'params' | 'header' | 'body'|'query';
+type getSchemaSpecifico = <T>(getUnicoSchema:Schema<T>) => Schema<T>;
+type schemas  = Record<tiposDeParams,Schema<any> >;
+type getTodosSchemas = (getSchema:getSchemaSpecifico) => Partial<schemas>;
+type tipoDeValidacao = (todosSchemas:getTodosSchemas) => RequestHandler;
 
 export const validacaoDosDados:tipoDeValidacao = (todosSchemas) => async (request, response, next) =>{
-    Object.entries(todosSchemas).forEach(([params,schema])=>{
+    const listSchemaErrors: Record< string, Record<string, string > > = {};
+    const schema = todosSchemas(schema=>schema);
+    Object.entries(schema).forEach(([key,value])=>{
         try {
-            schema.validateSync(request[ params as tiposDeParams], {abortEarly: false,});
-            return next();
+            value.validateSync(request[ key as tiposDeParams], {abortEarly: false,});
         } catch (err) {
             const errorMsg = err as ValidationError;
             const totalDeErroDeValidacao: Record< string, string> = {};
@@ -19,9 +21,12 @@ export const validacaoDosDados:tipoDeValidacao = (todosSchemas) => async (reques
                 if(!err.path) return ;
                 totalDeErroDeValidacao[err.path] = err.message
             }); 
-            return response
-                .status(StatusCodes.BAD_REQUEST)
-                .json({ error: totalDeErroDeValidacao });
+            listSchemaErrors [key] = totalDeErroDeValidacao;
         }
     })
+    
+    if(Object.entries(listSchemaErrors).length===0)return next();
+    return response
+            .status(StatusCodes.BAD_REQUEST)
+            .json({ error: listSchemaErrors });
 }
