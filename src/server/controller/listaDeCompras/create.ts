@@ -15,10 +15,12 @@ export const validarDados = validacaoDosDados((getSchema) => ({
             nome: yup.string().required().min(3),
         })
     ),
-})   );
+}));
 
 const createListaDeCompras = async ( request: Request<{}, {}, IListaDeCompras>, response: Response) => {
-    response.status(StatusCodes.OK).send(request.body);
+    const {uuid, nome} = request.body;
+    
+    response.status(StatusCodes.CREATED).send(request.body);
 };
 
 export default { createListaDeCompras };

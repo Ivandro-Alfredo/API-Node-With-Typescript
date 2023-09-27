@@ -13,12 +13,12 @@ router.get("/", (req, res) => {
 });
 
 router.post(
-    "/listadecompras/create",
+    "/create",
     validarDados,
     listaDecomprasController.createListaDeCompras
 );
 router.get(
-    "/listadecompras/listartudo",
+    "/listartudo",
     validarQueryListaDeCompra,
     listaDecomprasController.getTodasListasDeCompras
 );
