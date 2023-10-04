@@ -2,39 +2,33 @@ import { Express, Response,Request, RequestParamHandler} from "express";
 import * as yup from "yup";
 import { StatusCodes } from "http-status-codes";
 import { validacaoDosDados } from "../../shared/middlewares/validacao";
-
-interface IGetTodasListas{
-    page?: number;
-    limite?: number;
-    filter?: string;
-}
+import { PrismaClient } from "@prisma/client";
 
 interface IGetById{
-    id?:number;
-}
-
-export const validarQueryListaDeCompra  = validacaoDosDados(getSchema =>({
-    query:getSchema<IGetTodasListas>(yup.object().shape({
-        page: yup.number().moreThan(0),
-        limite: yup.number().moreThan(0),
-        filter:yup.string(),
-    })),
-}))
-
-const getTodasListasDeCompras = async (req: Request<{},{},{},IGetTodasListas>, res: Response)=>{
-    console.log(req.query)
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("we got the query, but not built yet");
+    id?:string;
 }
 
 export const validarIdListaDeCompra = validacaoDosDados(getSchema =>({
     params: getSchema<IGetById>(yup.object().shape({
-        id:yup.number().integer().required().moreThan(0)
+        id:yup.string().required()
     }))
 }))
 
 const getListaDeComprasById = async (req:Request<IGetById>, res:Response)=>{
-    console.log(req.params.id);
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("we got the id, but not built yet");
+    const prisma = new PrismaClient()
+    const result = await prisma.listaDeCompras.findUnique({
+        where:{
+            id:req.params.id,
+        }, select:{
+            nome:true,
+            data_de_criacao:true
+        }
+    })
+    console.log(result);
+
+    if(result !== null) return res.status(StatusCodes.OK).send({result});
+    return res.status(StatusCodes.NOT_FOUND).json("Nenhum resultado encontrado.");;
+    
 }
 
-export default {getTodasListasDeCompras,getListaDeComprasById}
+export default {getListaDeComprasById}

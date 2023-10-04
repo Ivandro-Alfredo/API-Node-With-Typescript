@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { listaDecomprasController } from "../controller";
 import { validarDados } from "../controller/listaDeCompras/create";
-import { validarQueryListaDeCompra } from "../controller/listaDeCompras/selectLista";
+import { validarQueryListaDeCompra } from "../controller/listaDeCompras/selectAll";
 import { validarIdListaDeCompra } from "../controller/listaDeCompras/selectLista";
 import { validarUpdateListaDeCompras } from "../controller/listaDeCompras/update";
 import { deleteListaById } from "../controller/listaDeCompras/delete";
@@ -18,25 +18,26 @@ router.post(
     listaDecomprasController.createListaDeCompras
 );
 router.get(
-    "/listartudo",
+    "/listall",
     validarQueryListaDeCompra,
     listaDecomprasController.getTodasListasDeCompras
 );
 router.get(
-    "/listadecompras/:id",
+    "/getlistadecompas/:id",
     validarIdListaDeCompra,
     listaDecomprasController.getListaDeComprasById
 );
 
 router.put(
-    "/listadecompras/:id",
+    "/update/:id",
     validarUpdateListaDeCompras,
     listaDecomprasController.updateListaDeCompras
 );
 router.delete(
-    "/listadecompras/:id",
+    "/delete/:id",
     deleteListaById,
     listaDecomprasController.deletById
 );
 
+router.delete("/deleteall", listaDecomprasController.deleteLiestaDeCompras);
 export { router };

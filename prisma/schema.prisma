@@ -23,7 +23,7 @@ model Produtos{
     id String @id @default(uuid())
     nome_do_produto String @unique
     quantidade_de_produto Int
-    listaDeCompra ListaDeCompras @relation(fields: [idListaDeCompra], references: [id])
+    listaDeCompra ListaDeCompras @relation(fields: [idListaDeCompra], references: [id], onDelete: Cascade)
     idListaDeCompra String @unique
 
     @@map("produtos")

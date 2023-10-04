@@ -2,24 +2,28 @@ import { Request, Response } from "express";
 import * as yup from "yup";
 import { StatusCodes } from "http-status-codes";
 import { validacaoDosDados } from "../../shared/middlewares/validacao";
-
-interface deleteAll{
-
-}
+import { PrismaClient } from "@prisma/client";
 
 interface IDeleteById{
-    id?: number;
+    id?: string;
 }
-
-const deleteLiestaDeCompras = (resquest: Request, Response: Response) => {};
 
 export const deleteListaById = validacaoDosDados(getSchema => ({
     params: getSchema<IDeleteById>(yup.object().shape({
-        id: yup.number().integer().moreThan(0)
+        id: yup.string()
     }))
 }))
-const deletById = (resquest: Request<IDeleteById>, response: Response) => {
-    response.status(StatusCodes.INTERNAL_SERVER_ERROR).send("update not built yet");
+
+const deletById = async (request: Request<IDeleteById>, response: Response) => {
+    const id = request.params.id;
+    const prisma = new PrismaClient()
+    const result = await prisma.listaDeCompras.delete({
+        where:{
+            id: id,
+        }
+    })
+    if(result!==null) return response.status(StatusCodes.OK).send("A Lista foi apagada.");
+    return response.status(StatusCodes.NOT_FOUND).send("Nenhum resultado encontrado")
 };
 
-export default { deleteLiestaDeCompras, deletById };
+export default { deletById };
