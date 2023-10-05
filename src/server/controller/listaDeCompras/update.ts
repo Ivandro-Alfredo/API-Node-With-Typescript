@@ -2,7 +2,7 @@ import {Request,Response} from 'express';
 import * as yup from "yup";
 import { validacaoDosDados } from '../../shared/middlewares/validacao';
 import { StatusCodes } from 'http-status-codes';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient , Prisma} from '@prisma/client';
 
 interface IUpdateById{
     id?:string;
@@ -33,10 +33,16 @@ const updateListaDeCompras= async (request:Request<IUpdateById,{},IUpdateBody>, 
             }
         })
         if(result!==null) return response.status(StatusCodes.OK).send("Lista de compra foi atualizada."); 
-        return response.status(StatusCodes.NOT_FOUND).send("Nenhum resultado encontrado.");
+        //return response.status(StatusCodes.NOT_MODIFIED).send("Nenhum resultado encontrado.");
     } catch (error) {
-        return response.status(StatusCodes.NOT_MODIFIED).send({"erro: ":"algo correu mal "+error});
-    }
+        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+            return response.status(StatusCodes.NOT_FOUND).send('Registro não encontrado.');
+          } else {
+            return response.status(StatusCodes.INTERNAL_SERVER_ERROR).send('Ocorreu um erro ao excluir o registro.');
+          }
+        } finally {
+          prisma.$disconnect();
+        }
     
 } 
 
